@@ -1,38 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet } from 'react-native';
-import { initDatabase, getDb } from './src/database/db';
+import { ActivityIndicator, View } from 'react-native';
+import { initDatabase } from './src/database/db';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
-  const [titles, setTitles] = useState([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      await initDatabase();
-      const db = await getDb();
-      const rows = await db.getAllAsync('SELECT * FROM titles');
-      setTitles(rows);
-    }
-    load();
+    initDatabase().then(() => setReady(true));
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>EpisodeX</Text>
-      <FlatList
-        data={titles}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <Text style={styles.item}>
-            {item.title} ({item.year}) - {item.type}
-          </Text>
-        )}
-      />
-    </View>
-  );
-}
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 70, paddingHorizontal: 20, backgroundColor: '#fff' },
-  heading: { fontSize: 28, fontWeight: 'bold', marginBottom: 20 },
-  item: { fontSize: 18, marginBottom: 10 },
-});
+  return <AppNavigator />;
+}
