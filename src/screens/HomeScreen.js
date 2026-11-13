@@ -1,23 +1,33 @@
 import { useCallback, useState } from 'react';
-import { Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
+import TitleCard from '../components/TitleCard';
+import { colors } from '../theme';
 
-function Section({ title, items, navigation, renderMeta }) {
+function Section({ title, items, navigation, subtitleOf, showProgress }) {
   return (
     <>
       <Text style={styles.heading}>{title}</Text>
       {items.length === 0 && <Text style={styles.empty}>Nothing here yet.</Text>}
-      {items.map((item) => (
-        <TouchableOpacity
-          key={item.id}
-          style={styles.card}
-          onPress={() => navigation.navigate('Details', { id: item.id })}
-        >
-          <Text style={styles.title}>{item.title}</Text>
-          <Text>{renderMeta(item)}</Text>
-        </TouchableOpacity>
-      ))}
+      {items.map((item) => {
+        const pct = item.total_eps ? (item.watched_eps / item.total_eps) * 100 : 0;
+        return (
+          <TitleCard
+            key={item.id}
+            item={item}
+            subtitle={subtitleOf(item)}
+            onPress={() => navigation.navigate('Details', { id: item.id })}
+            footer={
+              showProgress && item.type === 'series' ? (
+                <View style={styles.barBg}>
+                  <View style={[styles.barFill, { width: `${pct}%` }]} />
+                </View>
+              ) : null
+            }
+          />
+        );
+      })}
     </>
   );
 }
@@ -31,7 +41,6 @@ export default function HomeScreen({ navigation }) {
     useCallback(() => {
       async function load() {
         const db = await getDb();
-
         setWatching(
           await db.getAllAsync(
             `SELECT t.*,
@@ -44,14 +53,12 @@ export default function HomeScreen({ navigation }) {
              WHERE l.status = 'watching' ORDER BY l.added_at DESC`
           )
         );
-
         setPlan(
           await db.getAllAsync(
             `SELECT t.* FROM library l JOIN titles t ON t.id = l.title_id
              WHERE l.status = 'plan' ORDER BY l.added_at DESC LIMIT 5`
           )
         );
-
         setRecent(
           await db.getAllAsync(
             `SELECT t.* FROM library l JOIN titles t ON t.id = l.title_id
@@ -63,35 +70,27 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
+  const basic = (i) => `${i.year} · ${i.genre}`;
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.app}>EpisodeX</Text>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
+      <Text style={styles.app}>Episode<Text style={{ color: colors.accent }}>X</Text></Text>
+      <Text style={styles.tagline}>Track every movie and episode, offline.</Text>
 
       <Section
-        title="Currently Watching"
+        title="▶ Currently Watching"
         items={watching}
         navigation={navigation}
-        renderMeta={(i) =>
-          i.type === 'series'
-            ? `${i.watched_eps}/${i.total_eps} episodes watched`
-            : `${i.year} · ${i.genre}`
+        showProgress
+        subtitleOf={(i) =>
+          i.type === 'series' ? `${i.watched_eps}/${i.total_eps} episodes watched` : basic(i)
         }
       />
-      <Section
-        title="Watchlist"
-        items={plan}
-        navigation={navigation}
-        renderMeta={(i) => `${i.year} · ${i.genre} · ${i.type}`}
-      />
-      <Section
-        title="Recently Completed"
-        items={recent}
-        navigation={navigation}
-        renderMeta={(i) => `${i.year} · ${i.genre} · ${i.type}`}
-      />
+      <Section title="🕒 Watchlist" items={plan} navigation={navigation} subtitleOf={basic} />
+      <Section title="✅ Recently Completed" items={recent} navigation={navigation} subtitleOf={basic} />
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Explore')}>
-        <Text style={styles.buttonText}>Browse the catalogue</Text>
+        <Text style={styles.buttonText}>🔍  Browse the catalogue</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -99,11 +98,12 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { padding: 16, paddingBottom: 40 },
-  app: { fontSize: 30, fontWeight: 'bold', marginBottom: 8 },
-  heading: { fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 10 },
-  empty: { color: '#777', marginBottom: 8 },
-  card: { padding: 14, backgroundColor: '#f2f2f2', borderRadius: 10, marginBottom: 10 },
-  title: { fontSize: 17, fontWeight: 'bold', marginBottom: 2 },
-  button: { backgroundColor: '#2563eb', padding: 14, borderRadius: 10, marginTop: 24 },
+  app: { color: colors.text, fontSize: 34, fontWeight: 'bold' },
+  tagline: { color: colors.muted, marginBottom: 6 },
+  heading: { color: colors.text, fontSize: 20, fontWeight: 'bold', marginTop: 22, marginBottom: 12 },
+  empty: { color: colors.muted, marginBottom: 8 },
+  barBg: { height: 6, backgroundColor: colors.border, borderRadius: 3, marginTop: 8, overflow: 'hidden' },
+  barFill: { height: 6, backgroundColor: colors.accent, borderRadius: 3 },
+  button: { backgroundColor: colors.primary, padding: 16, borderRadius: 14, marginTop: 26 },
   buttonText: { color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: 'bold' },
 });

@@ -2,6 +2,15 @@ import { useCallback, useState } from 'react';
 import { View, Text, SectionList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
+import { colors } from '../theme';
+
+function Bar({ pct, color }) {
+  return (
+    <View style={styles.barBg}>
+      <View style={[styles.barFill, { width: `${pct}%`, backgroundColor: color }]} />
+    </View>
+  );
+}
 
 export default function SeriesTrackerScreen({ route, navigation }) {
   const { id } = route.params;
@@ -47,7 +56,6 @@ export default function SeriesTrackerScreen({ route, navigation }) {
     }, [load])
   );
 
-  // Update the library status automatically from episode progress
   async function syncStatus(db) {
     const row = await db.getFirstAsync(
       `SELECT COUNT(*) AS total, COALESCE(SUM(p.watched), 0) AS watched
@@ -81,32 +89,35 @@ export default function SeriesTrackerScreen({ route, navigation }) {
 
   return (
     <SectionList
+      style={{ backgroundColor: colors.bg }}
       sections={sections}
       keyExtractor={(item) => String(item.id)}
       contentContainerStyle={{ paddingBottom: 40 }}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.overall}>
-            Overall: {watchedTotal}/{total} episodes ({overallPct}%)
-          </Text>
-          <View style={styles.barBg}>
-            <View style={[styles.barFill, { width: `${overallPct}%` }]} />
-          </View>
+          <Text style={styles.overall}>{overallPct}% complete</Text>
+          <Text style={styles.overallSub}>{watchedTotal} of {total} episodes watched</Text>
+          <Bar pct={overallPct} color={colors.accent} />
         </View>
       }
       renderSectionHeader={({ section }) => {
         const pct = section.total ? Math.round((section.watched / section.total) * 100) : 0;
         return (
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Season {section.season.season_number}</Text>
-            <Text>{section.watched}/{section.total} watched ({pct}%)</Text>
+            <View style={styles.sectionTop}>
+              <Text style={styles.sectionTitle}>Season {section.season.season_number}</Text>
+              <Text style={styles.sectionCount}>{section.watched}/{section.total} · {pct}%</Text>
+            </View>
+            <Bar pct={pct} color={colors.primary} />
           </View>
         );
       }}
       renderItem={({ item }) => (
-        <TouchableOpacity style={styles.episode} onPress={() => toggle(item)}>
-          <Text style={styles.episodeText}>Episode {item.episode_number}</Text>
-          <Text style={styles.check}>{item.watched ? '✅' : '⬜'}</Text>
+        <TouchableOpacity style={styles.episode} onPress={() => toggle(item)} activeOpacity={0.7}>
+          <Text style={[styles.episodeText, item.watched === 1 && styles.episodeDone]}>
+            Episode {item.episode_number}
+          </Text>
+          <Text style={{ fontSize: 24 }}>{item.watched ? '✅' : '⬜'}</Text>
         </TouchableOpacity>
       )}
     />
@@ -114,17 +125,20 @@ export default function SeriesTrackerScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: { padding: 16 },
-  overall: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  barBg: { height: 10, backgroundColor: '#ddd', borderRadius: 5, overflow: 'hidden' },
-  barFill: { height: 10, backgroundColor: '#2563eb' },
-  sectionHeader: { backgroundColor: '#e8eefc', padding: 12, paddingHorizontal: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold' },
+  header: { padding: 20 },
+  overall: { color: colors.text, fontSize: 30, fontWeight: 'bold' },
+  overallSub: { color: colors.muted, marginBottom: 12, marginTop: 2 },
+  barBg: { height: 8, backgroundColor: colors.border, borderRadius: 4, overflow: 'hidden' },
+  barFill: { height: 8, borderRadius: 4 },
+  sectionHeader: { backgroundColor: colors.card2, padding: 14, paddingHorizontal: 20 },
+  sectionTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  sectionTitle: { color: colors.text, fontSize: 18, fontWeight: 'bold' },
+  sectionCount: { color: colors.muted },
   episode: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 14, paddingHorizontal: 16,
-    borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: '#fff',
+    paddingVertical: 14, paddingHorizontal: 20,
+    borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.bg,
   },
-  episodeText: { fontSize: 16 },
-  check: { fontSize: 22 },
+  episodeText: { color: colors.text, fontSize: 16 },
+  episodeDone: { color: colors.muted, textDecorationLine: 'line-through' },
 });

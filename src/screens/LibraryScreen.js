@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
+import Chip from '../components/Chip';
+import TitleCard from '../components/TitleCard';
+import { colors } from '../theme';
 
 const TABS = [
-  { key: 'plan', label: 'Plan' },
-  { key: 'watching', label: 'Watching' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'dropped', label: 'Dropped' },
-  { key: 'fav', label: '★ Favourites' },
+  { key: 'plan', label: 'Plan', color: '#3B82F6' },
+  { key: 'watching', label: 'Watching', color: '#F97316' },
+  { key: 'completed', label: 'Completed', color: '#2ECC71' },
+  { key: 'dropped', label: 'Dropped', color: '#FF5C5C' },
+  { key: 'fav', label: '★ Favourites', color: '#E0A800' },
 ];
 
 export default function LibraryScreen({ navigation }) {
@@ -21,13 +24,14 @@ export default function LibraryScreen({ navigation }) {
         const db = await getDb();
         const where = tab === 'fav' ? 'l.is_favourite = 1' : 'l.status = ?';
         const params = tab === 'fav' ? [] : [tab];
-        const rows = await db.getAllAsync(
-          `SELECT t.*, l.status, l.is_favourite, l.rating
-           FROM library l JOIN titles t ON t.id = l.title_id
-           WHERE ${where} ORDER BY l.added_at DESC`,
-          params
+        setItems(
+          await db.getAllAsync(
+            `SELECT t.*, l.status, l.is_favourite, l.rating
+             FROM library l JOIN titles t ON t.id = l.title_id
+             WHERE ${where} ORDER BY l.added_at DESC`,
+            params
+          )
         );
-        setItems(rows);
       }
       load();
     }, [tab])
@@ -37,33 +41,26 @@ export default function LibraryScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.row}>
         {TABS.map((t) => (
-          <TouchableOpacity
-            key={t.key}
-            style={[styles.chip, tab === t.key && styles.chipActive]}
-            onPress={() => setTab(t.key)}
-          >
-            <Text style={tab === t.key ? styles.chipTextActive : styles.chipText}>{t.label}</Text>
-          </TouchableOpacity>
+          <Chip key={t.key} label={t.label} color={t.color} active={tab === t.key} onPress={() => setTab(t.key)} />
         ))}
       </View>
 
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.id)}
-        ListEmptyComponent={<Text style={styles.empty}>Nothing here yet.</Text>}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <Text style={styles.empty}>📚 Nothing here yet.{'\n'}Add titles from Explore.</Text>
+        }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
+          <TitleCard
+            item={item}
             onPress={() => navigation.navigate('Details', { id: item.id })}
-          >
-            <Text style={styles.title}>
-              {item.is_favourite ? '★ ' : ''}{item.title}
-            </Text>
-            <Text>
-              {item.year} · {item.genre} · {item.type}
-              {item.rating ? `  ·  Rated ${item.rating}/5` : ''}
-            </Text>
-          </TouchableOpacity>
+            subtitle={
+              `${item.is_favourite ? '★ ' : ''}${item.year} · ${item.genre}` +
+              (item.rating ? `  ·  ${item.rating}/5` : '')
+            }
+          />
         )}
       />
     </View>
@@ -71,16 +68,7 @@ export default function LibraryScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
-  chip: {
-    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20,
-    backgroundColor: '#eee', marginRight: 8, marginBottom: 8,
-  },
-  chipActive: { backgroundColor: '#2563eb' },
-  chipText: { color: '#333' },
-  chipTextActive: { color: '#fff' },
-  card: { padding: 16, backgroundColor: '#f2f2f2', borderRadius: 10, marginBottom: 12 },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  empty: { textAlign: 'center', marginTop: 30, color: '#777' },
+  container: { flex: 1, padding: 16, backgroundColor: colors.bg },
+  row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 6 },
+  empty: { color: colors.muted, textAlign: 'center', marginTop: 50, fontSize: 16, lineHeight: 24 },
 });
