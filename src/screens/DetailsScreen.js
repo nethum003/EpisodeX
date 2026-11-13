@@ -1,21 +1,29 @@
 import { useCallback, useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, Button, StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
+import Chip from '../components/Chip';
+import { colors, getGenre } from '../theme';
 
 const STATUSES = [
-  { key: 'plan', label: 'Plan to Watch' },
-  { key: 'watching', label: 'Watching' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'dropped', label: 'Dropped' },
+  { key: 'plan', label: 'Plan to Watch', color: '#3B82F6' },
+  { key: 'watching', label: 'Watching', color: '#F97316' },
+  { key: 'completed', label: 'Completed', color: '#2ECC71' },
+  { key: 'dropped', label: 'Dropped', color: '#FF5C5C' },
 ];
+
+function Button({ label, onPress, color = colors.primary }) {
+  return (
+    <TouchableOpacity style={[styles.button, { backgroundColor: color }]} onPress={onPress} activeOpacity={0.8}>
+      <Text style={styles.buttonText}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function DetailsScreen({ route, navigation }) {
   const { id } = route.params;
   const [item, setItem] = useState(null);
-  const [entry, setEntry] = useState(null); // row from the library table, or null
+  const [entry, setEntry] = useState(null);
   const [reviewText, setReviewText] = useState('');
 
   const load = useCallback(async () => {
@@ -35,7 +43,6 @@ export default function DetailsScreen({ route, navigation }) {
     }, [load])
   );
 
-  // Make sure a library row exists, then change one field in it
   async function updateField(field, value) {
     const db = await getDb();
     await db.runAsync(
@@ -53,17 +60,25 @@ export default function DetailsScreen({ route, navigation }) {
   }
 
   if (!item) return null;
+  const g = getGenre(item.genre);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
+      <View style={[styles.hero, { backgroundColor: g.color }]}>
+        <Text style={styles.heroIcon}>{g.icon}</Text>
+      </View>
+
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.meta}>{item.year} · {item.genre} · {item.type}</Text>
-      {item.duration_min ? <Text style={styles.meta}>{item.duration_min} minutes</Text> : null}
+      <Text style={styles.meta}>
+        {item.year} · {item.genre} · {item.type === 'movie' ? 'Movie' : 'TV Series'}
+        {item.duration_min ? ` · ${item.duration_min} min` : ''}
+      </Text>
       <Text style={styles.desc}>{item.description}</Text>
 
       {item.type === 'series' && (
         <Button
-          title="Open Series Tracker"
+          label="📺  Open Series Tracker"
+          color={colors.accent}
           onPress={() => navigation.navigate('SeriesTracker', { id: item.id })}
         />
       )}
@@ -71,22 +86,21 @@ export default function DetailsScreen({ route, navigation }) {
       <Text style={styles.section}>Status</Text>
       <View style={styles.row}>
         {STATUSES.map((s) => (
-          <TouchableOpacity
+          <Chip
             key={s.key}
-            style={[styles.chip, entry?.status === s.key && styles.chipActive]}
+            label={s.label}
+            color={s.color}
+            active={entry?.status === s.key}
             onPress={() => updateField('status', s.key)}
-          >
-            <Text style={entry?.status === s.key ? styles.chipTextActive : styles.chipText}>
-              {s.label}
-            </Text>
-          </TouchableOpacity>
+          />
         ))}
       </View>
       {!entry && <Text style={styles.hint}>Not in your library yet. Pick a status to add it.</Text>}
 
       <Text style={styles.section}>Favourite</Text>
       <Button
-        title={entry?.is_favourite ? '★ Remove from favourites' : '☆ Add to favourites'}
+        label={entry?.is_favourite ? '★  In your favourites' : '☆  Add to favourites'}
+        color={entry?.is_favourite ? '#E0A800' : colors.card2}
         onPress={() => updateField('is_favourite', entry?.is_favourite ? 0 : 1)}
       />
 
@@ -94,7 +108,7 @@ export default function DetailsScreen({ route, navigation }) {
       <View style={styles.row}>
         {[1, 2, 3, 4, 5].map((n) => (
           <TouchableOpacity key={n} onPress={() => updateField('rating', n)}>
-            <Text style={styles.star}>{entry?.rating >= n ? '★' : '☆'}</Text>
+            <Text style={[styles.star, { color: entry?.rating >= n ? colors.star : colors.border }]}>★</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -103,15 +117,16 @@ export default function DetailsScreen({ route, navigation }) {
       <TextInput
         style={styles.review}
         placeholder="Write a short review..."
+        placeholderTextColor={colors.muted}
         multiline
         value={reviewText}
         onChangeText={setReviewText}
       />
-      <Button title="Save review" onPress={() => updateField('review', reviewText)} />
+      <Button label="Save review" onPress={() => updateField('review', reviewText)} />
 
       {entry && (
-        <View style={{ marginTop: 24 }}>
-          <Button title="Remove from library" color="#c0392b" onPress={removeFromLibrary} />
+        <View style={{ marginTop: 14 }}>
+          <Button label="Remove from library" color={colors.danger} onPress={removeFromLibrary} />
         </View>
       )}
     </ScrollView>
@@ -119,23 +134,21 @@ export default function DetailsScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingBottom: 60 },
-  title: { fontSize: 26, fontWeight: 'bold', marginBottom: 8 },
-  meta: { fontSize: 16, color: '#555', marginBottom: 4 },
-  desc: { fontSize: 16, marginVertical: 16 },
-  section: { fontSize: 18, fontWeight: 'bold', marginTop: 22, marginBottom: 8 },
-  row: { flexDirection: 'row', flexWrap: 'wrap' },
-  chip: {
-    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20,
-    backgroundColor: '#eee', marginRight: 8, marginBottom: 8,
-  },
-  chipActive: { backgroundColor: '#2563eb' },
-  chipText: { color: '#333' },
-  chipTextActive: { color: '#fff' },
-  hint: { color: '#777', marginTop: 4 },
-  star: { fontSize: 34, marginRight: 6, color: '#f5a623' },
+  container: { paddingBottom: 60 },
+  hero: { height: 190, justifyContent: 'center', alignItems: 'center', marginBottom: 18 },
+  heroIcon: { fontSize: 84 },
+  title: { color: colors.text, fontSize: 28, fontWeight: 'bold', paddingHorizontal: 20 },
+  meta: { color: colors.muted, fontSize: 15, marginTop: 4, paddingHorizontal: 20 },
+  desc: { color: colors.text, fontSize: 16, lineHeight: 23, margin: 20, marginBottom: 16, opacity: 0.85 },
+  section: { color: colors.text, fontSize: 18, fontWeight: 'bold', marginTop: 22, marginBottom: 10, paddingHorizontal: 20 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20 },
+  hint: { color: colors.muted, paddingHorizontal: 20 },
+  star: { fontSize: 38, marginRight: 8 },
   review: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 10,
-    padding: 12, minHeight: 80, marginBottom: 10, textAlignVertical: 'top',
+    color: colors.text, backgroundColor: colors.card, borderRadius: 14,
+    borderWidth: 1, borderColor: colors.border, padding: 14, minHeight: 90,
+    marginHorizontal: 20, marginBottom: 12, textAlignVertical: 'top',
   },
+  button: { marginHorizontal: 20, padding: 14, borderRadius: 14 },
+  buttonText: { color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: 'bold' },
 });
