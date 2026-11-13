@@ -15,5 +15,7 @@ export async function initDatabase() {
   const database = await getDb();
   await database.execAsync('PRAGMA foreign_keys = ON;');
   await database.execAsync(SCHEMA);
-  await seedIfEmpty(database);
+  await database.withTransactionAsync(async () => {
+    await seedIfEmpty(database);
+  });
 }
