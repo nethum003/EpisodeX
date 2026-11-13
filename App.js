@@ -7,7 +7,9 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    initDatabase().then(() => setReady(true));
+    initDatabase()
+  .then(() => setReady(true))
+  .catch((e) => console.error('DB init failed', e));
   }, []);
 
   if (!ready) {
