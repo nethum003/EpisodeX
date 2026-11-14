@@ -50,7 +50,7 @@ export default function LibraryScreen({ navigation }) {
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.empty}>📚 Nothing here yet.{'\n'}Add titles from Explore.</Text>
+          <Text style={styles.empty}>Nothing here yet.{'\n'}Add titles from Explore.</Text>
         }
         renderItem={({ item }) => (
           <TitleCard

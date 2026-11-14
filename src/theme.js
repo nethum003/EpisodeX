@@ -13,16 +13,16 @@ export const colors = {
 };
 
 const GENRES = {
-  'Sci-Fi': { color: '#3B82F6', icon: '🚀' },
-  Action: { color: '#EF4444', icon: '💥' },
-  Drama: { color: '#A855F7', icon: '🎭' },
-  Thriller: { color: '#F97316', icon: '😱' },
-  Crime: { color: '#64748B', icon: '🕵️' },
-  Animation: { color: '#EC4899', icon: '✨' },
-  Comedy: { color: '#EAB308', icon: '😂' },
-  Fantasy: { color: '#10B981', icon: '🐉' },
+  'Sci-Fi': '#3B82F6',
+  Action: '#EF4444',
+  Drama: '#A855F7',
+  Thriller: '#F97316',
+  Crime: '#64748B',
+  Animation: '#EC4899',
+  Comedy: '#EAB308',
+  Fantasy: '#10B981',
 };
 
 export function getGenre(name) {
-  return GENRES[name] || { color: colors.primary, icon: '🎬' };
+  return { color: GENRES[name] || colors.primary };
 }

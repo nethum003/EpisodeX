@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, FlatList, Text, TextInput, ScrollView, StyleSheet } from 'react-native';
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
-import PosterTile from '../components/PosterTile';
+import TitleCard from '../components/TitleCard';
 import { colors, getGenre } from '../theme';
 
 export default function ExploreScreen({ navigation }) {
@@ -40,16 +40,13 @@ export default function ExploreScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchBox}>
-        <Text style={{ fontSize: 18 }}>🔍</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Search movies & series..."
-          placeholderTextColor={colors.muted}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
+      <TextInput
+        style={styles.search}
+        placeholder="Search movies and series..."
+        placeholderTextColor={colors.muted}
+        value={search}
+        onChangeText={setSearch}
+      />
 
       <View style={styles.row}>
         <Chip label="All" active={type === 'all'} onPress={() => setType('all')} />
@@ -72,7 +69,7 @@ export default function ExploreScreen({ navigation }) {
           {genres.map((g) => (
             <Chip
               key={g}
-              label={`${getGenre(g).icon} ${g}`}
+              label={g}
               active={genre === g}
               color={getGenre(g).color}
               onPress={() => setGenre(g)}
@@ -85,14 +82,12 @@ export default function ExploreScreen({ navigation }) {
 
       <FlatList
         data={titles}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
-        ListEmptyComponent={<Text style={styles.empty}>🔍 No titles found.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>No titles found.</Text>}
         renderItem={({ item }) => (
-          <PosterTile item={item} onPress={() => navigation.navigate('Details', { id: item.id })} />
+          <TitleCard item={item} onPress={() => navigation.navigate('Details', { id: item.id })} />
         )}
       />
     </View>
@@ -101,12 +96,11 @@ export default function ExploreScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: colors.bg },
-  searchBox: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card,
-    borderRadius: 14, paddingHorizontal: 14, marginBottom: 12,
+  search: {
+    color: colors.text, fontSize: 16, padding: 14, marginBottom: 12,
+    backgroundColor: colors.card, borderRadius: 14,
     borderWidth: 1, borderColor: colors.border,
   },
-  input: { flex: 1, color: colors.text, fontSize: 16, padding: 12 },
   row: { flexDirection: 'row', alignItems: 'flex-start' },
   yearInput: {
     marginLeft: 'auto', width: 80, color: colors.text, textAlign: 'center',

@@ -1,12 +1,9 @@
 import { useCallback, useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, Image, StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
 import { colors, getGenre } from '../theme';
-import { getPoster } from '../posters';
 
 const STATUSES = [
   { key: 'plan', label: 'Plan to Watch', color: '#3B82F6' },
@@ -41,7 +38,7 @@ export default function DetailsScreen({ route, navigation }) {
     setItem(row);
     setEntry(lib);
     setReviewText(lib?.review ?? '');
-    navigation.setOptions({ title: row.title });
+    navigation.setOptions({ title: '' });
   }, [id]);
 
   useFocusEffect(
@@ -50,7 +47,6 @@ export default function DetailsScreen({ route, navigation }) {
     }, [load])
   );
 
-  // Make sure a library row exists, then change one field in it
   async function updateField(field, value) {
     const db = await getDb();
     await db.runAsync(
@@ -70,28 +66,23 @@ export default function DetailsScreen({ route, navigation }) {
   if (!item) return null;
 
   const g = getGenre(item.genre);
-  const poster = getPoster(item.title);
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
-      <View style={[styles.hero, { backgroundColor: g.color }]}>
-        {poster ? (
-          <Image source={poster} style={styles.heroPoster} resizeMode="cover" />
-        ) : (
-          <Text style={styles.heroIcon}>{g.icon}</Text>
-        )}
+      <View style={[styles.header, { backgroundColor: g.color }]}>
+        <Text style={styles.type}>{item.type === 'movie' ? 'MOVIE' : 'TV SERIES'}</Text>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.meta}>
+          {item.year}  ·  {item.genre}
+          {item.duration_min ? `  ·  ${item.duration_min} min` : ''}
+        </Text>
       </View>
 
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.meta}>
-        {item.year} · {item.genre} · {item.type === 'movie' ? 'Movie' : 'TV Series'}
-        {item.duration_min ? ` · ${item.duration_min} min` : ''}
-      </Text>
       <Text style={styles.desc}>{item.description}</Text>
 
       {item.type === 'series' && (
         <Button
-          label="📺  Open Series Tracker"
+          label="Open Series Tracker"
           color={colors.accent}
           onPress={() => navigation.navigate('SeriesTracker', { id: item.id })}
         />
@@ -151,13 +142,12 @@ export default function DetailsScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { paddingBottom: 60 },
-  hero: { height: 280, justifyContent: 'center', alignItems: 'center', marginBottom: 18 },
-  heroIcon: { fontSize: 84 },
-  heroPoster: { width: 160, height: 240, borderRadius: 12 },
-  title: { color: colors.text, fontSize: 28, fontWeight: 'bold', paddingHorizontal: 20 },
-  meta: { color: colors.muted, fontSize: 15, marginTop: 4, paddingHorizontal: 20 },
+  header: { padding: 24, paddingTop: 30, paddingBottom: 30 },
+  type: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: 'bold', letterSpacing: 1.5, marginBottom: 8 },
+  title: { color: '#fff', fontSize: 34, fontWeight: 'bold', lineHeight: 40 },
+  meta: { color: 'rgba(255,255,255,0.85)', fontSize: 15, marginTop: 10 },
   desc: {
-    color: colors.text, fontSize: 16, lineHeight: 23,
+    color: colors.text, fontSize: 16, lineHeight: 24,
     margin: 20, marginBottom: 16, opacity: 0.85,
   },
   section: {

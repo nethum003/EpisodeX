@@ -10,10 +10,9 @@ function formatTime(min) {
   return `${Math.floor(min / 60)}h ${min % 60}m`;
 }
 
-function Stat({ icon, label, value, color }) {
+function Stat({ label, value, color }) {
   return (
     <View style={[styles.stat, { borderLeftColor: color }]}>
-      <Text style={styles.statIcon}>{icon}</Text>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -82,12 +81,12 @@ export default function ProfileScreen({ navigation }) {
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Your Statistics</Text>
       <View style={styles.grid}>
-        <Stat icon="🎬" label="Movies watched" value={stats.movies} color="#3B82F6" />
-        <Stat icon="🏆" label="Series completed" value={stats.series} color="#A855F7" />
-        <Stat icon="📺" label="Episodes watched" value={stats.episodes} color={colors.accent} />
-        <Stat icon="▶️" label="Currently watching" value={stats.watching} color="#F97316" />
-        <Stat icon="⭐" label={`Avg rating (${stats.ratedCount})`} value={stats.avgRating} color={colors.star} />
-        <Stat icon="⏱️" label="Est. watch time" value={formatTime(stats.minutes)} color={colors.success} />
+        <Stat label="Movies watched" value={stats.movies} color="#3B82F6" />
+        <Stat label="Series completed" value={stats.series} color="#A855F7" />
+        <Stat label="Episodes watched" value={stats.episodes} color={colors.accent} />
+        <Stat label="Currently watching" value={stats.watching} color="#F97316" />
+        <Stat label={`Avg rating (${stats.ratedCount})`} value={stats.avgRating} color={colors.star} />
+        <Stat label="Est. watch time" value={formatTime(stats.minutes)} color={colors.success} />
       </View>
       <Text style={styles.note}>
         Watch time counts movie durations plus {EPISODE_MINUTES} min per episode watched.
@@ -97,7 +96,7 @@ export default function ProfileScreen({ navigation }) {
       {genres.length === 0 && <Text style={styles.empty}>Add titles to your library first.</Text>}
       {genres.map((g) => (
         <View key={g.genre} style={[styles.genreRow, { backgroundColor: getGenre(g.genre).color }]}>
-          <Text style={styles.genreText}>{getGenre(g.genre).icon}  {g.genre}</Text>
+          <Text style={styles.genreText}>{g.genre}</Text>
           <Text style={styles.genreText}>{g.c}</Text>
         </View>
       ))}
@@ -128,8 +127,7 @@ const styles = StyleSheet.create({
     width: '48%', backgroundColor: colors.card, borderRadius: 14, padding: 14,
     marginBottom: 12, borderLeftWidth: 4,
   },
-  statIcon: { fontSize: 22, marginBottom: 4 },
-  statValue: { fontSize: 26, fontWeight: 'bold' },
+  statValue: { fontSize: 28, fontWeight: 'bold' },
   statLabel: { color: colors.muted, marginTop: 2 },
   note: { color: colors.muted, fontSize: 12 },
   empty: { color: colors.muted },
