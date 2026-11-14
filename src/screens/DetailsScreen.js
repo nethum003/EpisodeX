@@ -1,9 +1,12 @@
 import { useCallback, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, ScrollView, Image, StyleSheet,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
 import { colors, getGenre } from '../theme';
+import { getPoster } from '../posters';
 
 const STATUSES = [
   { key: 'plan', label: 'Plan to Watch', color: '#3B82F6' },
@@ -14,7 +17,11 @@ const STATUSES = [
 
 function Button({ label, onPress, color = colors.primary }) {
   return (
-    <TouchableOpacity style={[styles.button, { backgroundColor: color }]} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={[styles.button, { backgroundColor: color }]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
       <Text style={styles.buttonText}>{label}</Text>
     </TouchableOpacity>
   );
@@ -43,6 +50,7 @@ export default function DetailsScreen({ route, navigation }) {
     }, [load])
   );
 
+  // Make sure a library row exists, then change one field in it
   async function updateField(field, value) {
     const db = await getDb();
     await db.runAsync(
@@ -60,12 +68,18 @@ export default function DetailsScreen({ route, navigation }) {
   }
 
   if (!item) return null;
+
   const g = getGenre(item.genre);
+  const poster = getPoster(item.title);
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
       <View style={[styles.hero, { backgroundColor: g.color }]}>
-        <Text style={styles.heroIcon}>{g.icon}</Text>
+        {poster ? (
+          <Image source={poster} style={styles.heroPoster} resizeMode="cover" />
+        ) : (
+          <Text style={styles.heroIcon}>{g.icon}</Text>
+        )}
       </View>
 
       <Text style={styles.title}>{item.title}</Text>
@@ -108,7 +122,9 @@ export default function DetailsScreen({ route, navigation }) {
       <View style={styles.row}>
         {[1, 2, 3, 4, 5].map((n) => (
           <TouchableOpacity key={n} onPress={() => updateField('rating', n)}>
-            <Text style={[styles.star, { color: entry?.rating >= n ? colors.star : colors.border }]}>★</Text>
+            <Text style={[styles.star, { color: entry?.rating >= n ? colors.star : colors.border }]}>
+              ★
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -135,12 +151,19 @@ export default function DetailsScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { paddingBottom: 60 },
-  hero: { height: 190, justifyContent: 'center', alignItems: 'center', marginBottom: 18 },
+  hero: { height: 280, justifyContent: 'center', alignItems: 'center', marginBottom: 18 },
   heroIcon: { fontSize: 84 },
+  heroPoster: { width: 160, height: 240, borderRadius: 12 },
   title: { color: colors.text, fontSize: 28, fontWeight: 'bold', paddingHorizontal: 20 },
   meta: { color: colors.muted, fontSize: 15, marginTop: 4, paddingHorizontal: 20 },
-  desc: { color: colors.text, fontSize: 16, lineHeight: 23, margin: 20, marginBottom: 16, opacity: 0.85 },
-  section: { color: colors.text, fontSize: 18, fontWeight: 'bold', marginTop: 22, marginBottom: 10, paddingHorizontal: 20 },
+  desc: {
+    color: colors.text, fontSize: 16, lineHeight: 23,
+    margin: 20, marginBottom: 16, opacity: 0.85,
+  },
+  section: {
+    color: colors.text, fontSize: 18, fontWeight: 'bold',
+    marginTop: 22, marginBottom: 10, paddingHorizontal: 20,
+  },
   row: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20 },
   hint: { color: colors.muted, paddingHorizontal: 20 },
   star: { fontSize: 38, marginRight: 8 },
