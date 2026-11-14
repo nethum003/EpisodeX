@@ -1,4 +1,3 @@
-import { Text } from 'react-native';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -26,13 +25,6 @@ const navTheme = {
   },
 };
 
-const ICONS = {
-  Home: '🏠',
-  Explore: '🧭',
-  'My Library': '📚',
-  Profile: '👤',
-};
-
 const headerOptions = {
   headerStyle: { backgroundColor: colors.card },
   headerTintColor: colors.text,
@@ -42,15 +34,16 @@ const headerOptions = {
 function Tabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={{
         ...headerOptions,
-        tabBarIcon: ({ focused }) => (
-          <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{ICONS[route.name]}</Text>
-        ),
+        tabBarIcon: () => null,
+        tabBarIconStyle: { display: 'none' },
+        tabBarLabelStyle: { fontSize: 14, fontWeight: '600' },
+        tabBarItemStyle: { justifyContent: 'center' },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
-      })}
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />

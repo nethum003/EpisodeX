@@ -117,7 +117,9 @@ export default function SeriesTrackerScreen({ route, navigation }) {
           <Text style={[styles.episodeText, item.watched === 1 && styles.episodeDone]}>
             Episode {item.episode_number}
           </Text>
-          <Text style={{ fontSize: 24 }}>{item.watched ? '✅' : '⬜'}</Text>
+                    <View style={[styles.check, item.watched === 1 && styles.checkDone]}>
+            {item.watched === 1 && <Text style={styles.checkMark}>✓</Text>}
+          </View>
         </TouchableOpacity>
       )}
     />
@@ -141,4 +143,10 @@ const styles = StyleSheet.create({
   },
   episodeText: { color: colors.text, fontSize: 16 },
   episodeDone: { color: colors.muted, textDecorationLine: 'line-through' },
+    check: {
+    width: 26, height: 26, borderRadius: 13, borderWidth: 2,
+    borderColor: colors.muted, justifyContent: 'center', alignItems: 'center',
+  },
+  checkDone: { backgroundColor: colors.success, borderColor: colors.success },
+  checkMark: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
 });

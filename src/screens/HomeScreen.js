@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
-  const basic = (i) => `${i.year} · ${i.genre}`;
+  const basic = (i) => `${i.year}  ·  ${i.genre}`;
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
@@ -78,7 +78,7 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.tagline}>Track every movie and episode, offline.</Text>
 
       <Section
-        title="▶ Currently Watching"
+        title="Currently Watching"
         items={watching}
         navigation={navigation}
         showProgress
@@ -86,11 +86,11 @@ export default function HomeScreen({ navigation }) {
           i.type === 'series' ? `${i.watched_eps}/${i.total_eps} episodes watched` : basic(i)
         }
       />
-      <Section title="🕒 Watchlist" items={plan} navigation={navigation} subtitleOf={basic} />
-      <Section title="✅ Recently Completed" items={recent} navigation={navigation} subtitleOf={basic} />
+      <Section title="Watchlist" items={plan} navigation={navigation} subtitleOf={basic} />
+      <Section title="Recently Completed" items={recent} navigation={navigation} subtitleOf={basic} />
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Explore')}>
-        <Text style={styles.buttonText}>🔍  Browse the catalogue</Text>
+        <Text style={styles.buttonText}>Browse the catalogue</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   tagline: { color: colors.muted, marginBottom: 6 },
   heading: { color: colors.text, fontSize: 20, fontWeight: 'bold', marginTop: 22, marginBottom: 12 },
   empty: { color: colors.muted, marginBottom: 8 },
-  barBg: { height: 6, backgroundColor: colors.border, borderRadius: 3, marginTop: 8, overflow: 'hidden' },
+  barBg: { height: 6, backgroundColor: colors.border, borderRadius: 3, marginTop: 10, overflow: 'hidden' },
   barFill: { height: 6, backgroundColor: colors.accent, borderRadius: 3 },
   button: { backgroundColor: colors.primary, padding: 16, borderRadius: 14, marginTop: 26 },
   buttonText: { color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: 'bold' },

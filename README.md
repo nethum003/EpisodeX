@@ -46,15 +46,12 @@ The database is created and seeded automatically on first launch. No internet co
 
 ## Project Structure
 ```
-assets/posters/   Local poster images (bundled with the app)
-scripts/          generate-posters.js (builds the poster registry)
 src/
-  components/     Chip.js, PosterTile.js, TitleCard.js
-  database/       db.js, schema.js, seed.js
-  navigation/     AppNavigator.js
-  screens/        Home, Explore, Library, Details, SeriesTracker, Profile
-  posters.js      Auto-generated poster registry
-  theme.js        Colours and genre styles
+  components/   Chip.js, TitleCard.js
+  database/     db.js, schema.js, seed.js
+  navigation/   AppNavigator.js
+  screens/      Home, Explore, Library, Details, SeriesTracker, Profile
+  theme.js      Colours and genre accent colours
 App.js
 ```
 
@@ -76,5 +73,5 @@ App.js
 After the app is installed or loaded, all features work without an internet connection, since all data is stored in the local SQLite database.
 
 ## Notes
-- Posters are bundled locally in `assets/posters` (no internet needed) and are used for educational purposes only.
+- The interface is text-based: each title is shown with a genre-coloured accent, with no images or external assets.
 - Watch time estimates assume 45 minutes per episode.
