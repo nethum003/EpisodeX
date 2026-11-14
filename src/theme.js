@@ -12,6 +12,12 @@ export const colors = {
   star: '#FFC83D',
 };
 
+// One colour for movies, one for TV series
+export const TYPE_COLORS = {
+  movie: '#3B82F6',
+  series: '#FF5C8A',
+};
+
 const GENRES = {
   'Sci-Fi': '#3B82F6',
   Action: '#EF4444',

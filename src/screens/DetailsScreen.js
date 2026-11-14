@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 
 import { useFocusEffect } from '@react-navigation/native';
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
-import { colors, getGenre } from '../theme';
+import { colors, TYPE_COLORS } from '../theme';
 
 const STATUSES = [
   { key: 'plan', label: 'Plan to Watch', color: '#3B82F6' },
@@ -65,11 +65,11 @@ export default function DetailsScreen({ route, navigation }) {
 
   if (!item) return null;
 
-  const g = getGenre(item.genre);
+  const typeColor = TYPE_COLORS[item.type];
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.container}>
-      <View style={[styles.header, { backgroundColor: g.color }]}>
+      <View style={[styles.header, { backgroundColor: typeColor }]}>
         <Text style={styles.type}>{item.type === 'movie' ? 'MOVIE' : 'TV SERIES'}</Text>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.meta}>

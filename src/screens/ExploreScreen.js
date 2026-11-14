@@ -3,7 +3,7 @@ import { View, FlatList, Text, TextInput, ScrollView, StyleSheet } from 'react-n
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
 import TitleCard from '../components/TitleCard';
-import { colors, getGenre } from '../theme';
+import { colors, TYPE_COLORS } from '../theme';
 
 export default function ExploreScreen({ navigation }) {
   const [titles, setTitles] = useState([]);
@@ -50,8 +50,18 @@ export default function ExploreScreen({ navigation }) {
 
       <View style={styles.row}>
         <Chip label="All" active={type === 'all'} onPress={() => setType('all')} />
-        <Chip label="Movies" active={type === 'movie'} onPress={() => setType('movie')} />
-        <Chip label="TV Series" active={type === 'series'} onPress={() => setType('series')} color={colors.accent} />
+        <Chip
+          label="Movies"
+          active={type === 'movie'}
+          color={TYPE_COLORS.movie}
+          onPress={() => setType('movie')}
+        />
+        <Chip
+          label="TV Series"
+          active={type === 'series'}
+          color={TYPE_COLORS.series}
+          onPress={() => setType('series')}
+        />
         <TextInput
           style={styles.yearInput}
           placeholder="Year"
@@ -71,7 +81,6 @@ export default function ExploreScreen({ navigation }) {
               key={g}
               label={g}
               active={genre === g}
-              color={getGenre(g).color}
               onPress={() => setGenre(g)}
             />
           ))}

@@ -1,14 +1,14 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, getGenre } from '../theme';
+import { colors, TYPE_COLORS } from '../theme';
 
 export default function TitleCard({ item, onPress, subtitle, footer }) {
-  const g = getGenre(item.genre);
+  const typeColor = TYPE_COLORS[item.type];
   const isMovie = item.type === 'movie';
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <View style={[styles.accent, { backgroundColor: g.color }]} />
+      <View style={[styles.accent, { backgroundColor: typeColor }]} />
       <View style={styles.body}>
-        <Text style={[styles.type, { color: g.color }]}>{isMovie ? 'MOVIE' : 'TV SERIES'}</Text>
+        <Text style={[styles.type, { color: typeColor }]}>{isMovie ? 'MOVIE' : 'TV SERIES'}</Text>
         <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.meta}>{subtitle ?? `${item.year}  ·  ${item.genre}`}</Text>
         {footer}
