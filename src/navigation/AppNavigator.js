@@ -8,6 +8,7 @@ import LibraryScreen from '../screens/LibraryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SeriesTrackerScreen from '../screens/SeriesTrackerScreen';
+import TabIcon from '../components/TabIcon';
 import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -25,6 +26,13 @@ const navTheme = {
   },
 };
 
+const ICONS = {
+  Home: 'home',
+  Explore: 'explore',
+  'My Library': 'library',
+  Profile: 'profile',
+};
+
 const headerOptions = {
   headerStyle: { backgroundColor: colors.card },
   headerTintColor: colors.text,
@@ -34,16 +42,14 @@ const headerOptions = {
 function Tabs() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         ...headerOptions,
-        tabBarIcon: () => null,
-        tabBarIconStyle: { display: 'none' },
-        tabBarLabelStyle: { fontSize: 14, fontWeight: '600' },
-        tabBarItemStyle: { justifyContent: 'center' },
+        tabBarIcon: ({ color }) => <TabIcon name={ICONS[route.name]} color={color} />,
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
-      }}
+      })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
