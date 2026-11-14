@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, FlatList, Text, TextInput, ScrollView, StyleSheet } from 'react-native';
 import { getDb } from '../database/db';
 import Chip from '../components/Chip';
-import TitleCard from '../components/TitleCard';
+import PosterTile from '../components/PosterTile';
 import { colors, getGenre } from '../theme';
 
 export default function ExploreScreen({ navigation }) {
@@ -81,13 +81,18 @@ export default function ExploreScreen({ navigation }) {
         </ScrollView>
       </View>
 
+      <Text style={styles.count}>{titles.length} titles</Text>
+
       <FlatList
         data={titles}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={<Text style={styles.empty}>🔍 No titles found.</Text>}
         renderItem={({ item }) => (
-          <TitleCard item={item} onPress={() => navigation.navigate('Details', { id: item.id })} />
+          <PosterTile item={item} onPress={() => navigation.navigate('Details', { id: item.id })} />
         )}
       />
     </View>
@@ -109,5 +114,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border, paddingVertical: 7,
   },
   genreRow: { flexGrow: 0 },
+  count: { color: colors.muted, marginTop: 4, marginBottom: 10 },
   empty: { color: colors.muted, textAlign: 'center', marginTop: 40, fontSize: 16 },
 });
